@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/Simulation.Checkout.Application/Simulation.Checkout.Application.csproj" />
+  <Project Path="src/Simulation.Checkout.Domain/Simulation.Checkout.Domain.csproj" />
+  <Project Path="src/Simulation.Checkout.Infrastructure/Simulation.Checkout.Infrastructure.csproj" />
+  <Project Path="tests/Simulation.Checkout.Tests/Simulation.Checkout.Tests.csproj" />
+  <Project Path="UnitTestingAssignment2/UnitTestingAssignment2.csproj" />
+</Solution>
