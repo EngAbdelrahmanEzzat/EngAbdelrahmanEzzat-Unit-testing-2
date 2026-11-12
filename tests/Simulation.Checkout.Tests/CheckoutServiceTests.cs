@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using Bogus;
+using AutoFixture;
 using Moq;
 using Shouldly;
 using Simulation.Checkout.Application;
@@ -471,6 +473,109 @@ namespace Simulation.Checkout.Tests
 
             iNotificationService.Verify(x => x.SendOrderConfirmationAsync(It.IsAny<CheckoutReceipt>(), It.IsAny<CancellationToken>()), Times.Never);
         }
+
+        [Fact]
+        public async Task CheckoutAsync_WithMultipleOrders_ReturnsSumOfAllOrders()
+        {
+            // Arrange
+            var iOrderRepository = new Mock<IOrderRepository>();
+            var iInventoryService = new Mock<IInventoryService>();
+            var iNotificationService = new Mock<INotificationService>();
+
+            var checkoutService = new CheckoutService(
+                iOrderRepository.Object,
+                iInventoryService.Object,
+                iNotificationService.Object);
+
+           var fixture = new Fixture();
+            fixture.Customize<OrderItem>(c=>c
+            .With(x => x.Quantity,()=>Random.Shared.Next(1, 10))
+            .With(x => x.UnitPrice,()=>Random.Shared.Next(0, 10000)));
+            var orders = fixture.CreateMany<Order>(3).ToList();
+            foreach (var order in orders)
+            {
+                foreach (var item in order.Items)
+                {
+                    iInventoryService
+                        .Setup(x => x.IsAvailableAsync(
+                            item.ProductId,
+                            item.Quantity,
+                            It.IsAny<CancellationToken>()))
+                        .ReturnsAsync(true);
+                }
+            }
+            decimal sum = 0;
+            decimal discount = 0;
+            foreach (var order in orders)
+            {
+                foreach (var item in order.Items)
+                {
+                    sum += item.UnitPrice * item.Quantity;
+                }
+                if(sum<1000)
+                {
+                    discount += 0;
+                }
+                else
+                {
+                    if(sum >= 1000)
+                    {
+                        discount += 100;
+                    }
+                }
+            }
+            decimal expectedTotal = orders.Sum(o => o.Items.Sum(i => i.UnitPrice * i.Quantity)) - discount;
+            // Act
+            decimal actualTotal = 0;
+            foreach (var order in orders)
+            {
+                var receipt = await checkoutService.CheckoutAsync(order);
+                actualTotal += receipt.Total;
+            }
+            // Assert
+            actualTotal.Should().Be(expectedTotal);
+
+
+        }
+        private static readonly Faker<OrderItem> items = new Faker<OrderItem>()
+    .UseSeed(2026)
+    .RuleFor(i => i.ProductId, f => f.Random.Guid())
+    .RuleFor(i => i.ProductName, f => f.Commerce.ProductName())
+    .RuleFor(i => i.UnitPrice, f => Math.Round(f.Random.Decimal(1, 1000), 2))
+    .RuleFor(i => i.Quantity, f => f.Random.Int(1, 5));
+
+        private static readonly Faker<Order> customers = new Faker<Order>()
+            .UseSeed(2026)
+            .RuleFor(c => c.CustomerName, f => f.Name.FullName())
+            .RuleFor(c => c.CustomerEmail, f => f.Internet.Email())
+            .RuleFor(c => c.Items, f => items.Generate(1));
+        [Fact]
+        public async Task CreateReceipt_WithValidOrder_CopiesCustomerNameAndEmail()
+        {
+            // Arrange
+            var iOrderRepository = new Mock<IOrderRepository>();
+            var iInventoryService = new Mock<IInventoryService>();
+            var iNotificationService = new Mock<INotificationService>();
+
+            var checkoutService = new CheckoutService(
+                iOrderRepository.Object,
+                iInventoryService.Object,
+                iNotificationService.Object);
+            iInventoryService
+               .Setup(x => x.IsAvailableAsync(
+                   It.IsAny<Guid>(),
+                   It.IsAny<int>(),
+                   It.IsAny<CancellationToken>()))
+               .ReturnsAsync(true);
+            //Act
+            var order = customers.Generate();
+            var recipt = await checkoutService.CheckoutAsync(order);
+           
+            //Assert
+            recipt.CustomerName.Should().Be(order.CustomerName);
+            recipt.CustomerEmail.Should().Be(order.CustomerEmail);
+        }
+
 
     }
 }
