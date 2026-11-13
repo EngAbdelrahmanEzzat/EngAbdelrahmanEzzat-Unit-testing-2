@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Bogus;
+using VerifyXunit;
 using AutoFixture;
 using Moq;
 using Shouldly;
@@ -574,6 +575,47 @@ namespace Simulation.Checkout.Tests
             //Assert
             recipt.CustomerName.Should().Be(order.CustomerName);
             recipt.CustomerEmail.Should().Be(order.CustomerEmail);
+        }
+
+        [Fact]
+        public async Task CheckoutAsync_CheckExampleC_UsingVerifyXunit()
+        {
+            // Arrange
+            var iOrderRepository = new Mock<IOrderRepository>();
+            var iInventoryService = new Mock<IInventoryService>();
+            var iNotificationService = new Mock<INotificationService>();
+
+            var checkoutService = new CheckoutService(
+                iOrderRepository.Object,
+                iInventoryService.Object,
+                iNotificationService.Object);
+            iInventoryService
+               .Setup(x => x.IsAvailableAsync(
+                   It.IsAny<Guid>(),
+                   It.IsAny<int>(),
+                   It.IsAny<CancellationToken>()))
+               .ReturnsAsync(true);
+
+            var orderItem = new OrderItem
+            {
+                ProductId = Guid.NewGuid(),
+                ProductName = "Product C",
+                UnitPrice = 500m,
+                Quantity = 3
+            };
+            var order = new Order
+            {
+                Id = Guid.NewGuid(),
+                CustomerName = "John Doe",
+                CustomerEmail = "john.doe@example.com",
+                Items = new List<OrderItem> { orderItem }
+            };
+
+            // Act
+            var receipt = await checkoutService.CheckoutAsync(order);
+
+            // Assert
+             await Verify(receipt);
         }
 
 
