@@ -1,0 +1,18 @@
+﻿{
+  OrderId: Guid_1,
+  CustomerName: John Doe,
+  CustomerEmail: john.doe@example.com,
+  Items: [
+    {
+      ProductId: Guid_2,
+      ProductName: Product C,
+      UnitPrice: 500.0,
+      Quantity: 3,
+      LineTotal: 1500.0
+    }
+  ],
+  Subtotal: 1500.0,
+  Discount: 100.0,
+  Total: 1400.0,
+  CreatedAt: DateTimeOffset_1
+}

@@ -1,0 +1,37 @@
+Summary
+  Generated on: 11/13/2026 - 3:59:47 PM
+  Coverage date: 11/13/2026 - 3:59:26 PM
+  Parser: Cobertura
+  Assemblies: 3
+  Classes: 11
+  Files: 6
+  Line coverage: 90.5%
+  Covered lines: 106
+  Uncovered lines: 11
+  Coverable lines: 117
+  Total lines: 227
+  Branch coverage: 83.3% (20 of 24)
+  Covered branches: 20
+  Total branches: 24
+  Method coverage: 88.8% (32 of 36)
+  Full method coverage: 88.8% (32 of 36)
+  Covered methods: 32
+  Fully covered methods: 32
+  Total methods: 36
+
+Simulation.Checkout.Application                                          95.8%
+  Simulation.Checkout.Application.CheckoutService                        95.8%
+
+Simulation.Checkout.Domain                                                100%
+  Simulation.Checkout.Domain.CheckoutReceipt                              100%
+  Simulation.Checkout.Domain.Exceptions.CheckoutException                 100%
+  Simulation.Checkout.Domain.Exceptions.EmptyOrderException               100%
+  Simulation.Checkout.Domain.Exceptions.InsufficientInventoryException    100%
+  Simulation.Checkout.Domain.Exceptions.InvalidPriceException             100%
+  Simulation.Checkout.Domain.Exceptions.InvalidQuantityException          100%
+  Simulation.Checkout.Domain.Order                                        100%
+  Simulation.Checkout.Domain.OrderItem                                    100%
+  Simulation.Checkout.Domain.ReceiptLine                                  100%
+
+Simulation.Checkout.Infrastructure                                          0%
+  Simulation.Checkout.Infrastructure.InMemoryOrderRepository                0%
